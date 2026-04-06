@@ -21,15 +21,59 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Instalar PWABuilder CLI
-        run: npm install -g @pwabuilder/cli
-
-      - name: Gerar APK
+      - name: Instalar Bubblewrap e responder perguntas
         run: |
-          pwa package \
-            --url "https://junior567cardozo-create.github.io/botda82/botda82.html" \
-            --platform android \
-            --output ./apk-output
+          npm install -g @bubblewrap/cli
+          mkdir -p ~/.bubblewrap
+          cat > ~/.bubblewrap/config.json << CONF
+          {
+            "jdkPath": "$JAVA_HOME",
+            "androidSdkPath": "$ANDROID_HOME"
+          }
+          CONF
+
+      - name: Criar twa-manifest.json
+        run: |
+          cat > twa-manifest.json << MANIFEST
+          {
+            "packageId": "com.botda82.app",
+            "host": "junior567cardozo-create.github.io",
+            "name": "Bot Da 82",
+            "launcherName": "Bot Da 82",
+            "display": "standalone",
+            "themeColor": "#050714",
+            "navigationColor": "#050714",
+            "backgroundColor": "#050714",
+            "enableNotifications": false,
+            "startUrl": "/botda82/botda82.html",
+            "iconUrl": "https://junior567cardozo-create.github.io/botda82/menu.jpg",
+            "maskableIconUrl": "https://junior567cardozo-create.github.io/botda82/menu.jpg",
+            "appVersion": "1.0.0",
+            "appVersionCode": 1,
+            "signingKey": {
+              "path": "android.keystore",
+              "alias": "android"
+            },
+            "splashScreenFadeOutDuration": 300,
+            "enableSiteSettingsShortcut": true,
+            "isChromeOSOnly": false,
+            "isMetaQuest": false,
+            "fullScopeUrl": "https://junior567cardozo-create.github.io/botda82/",
+            "minSdkVersion": 21,
+            "orientation": "portrait"
+          }
+          MANIFEST
+
+      - name: Build APK com Bubblewrap direto
+        run: |
+          mkdir apk-build
+          cp twa-manifest.json apk-build/twa-manifest.json
+          cd apk-build
+          bubblewrap build --manifest twa-manifest.json --skipSigning 2>&1 || true
+          ls -la
+
+      - name: Procurar APK gerado
+        run: find . -name "*.apk" 2>/dev/null
 
       - name: Release
         uses: softprops/action-gh-release@v2
@@ -41,6 +85,7 @@ jobs:
             1. Baixe o .apk abaixo
             2. Permita fontes desconhecidas
             3. Instale! 🔥
-          files: apk-output/**/*.apk
+          files: |
+            **/*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
