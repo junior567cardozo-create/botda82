@@ -1,0 +1,18 @@
+{
+  "name": "Bot Da 82",
+  "short_name": "Bot Da 82",
+  "description": "App oficial da Turma 82 - 8° Ano 2026",
+  "start_url": "/botda82/botda82.html",
+  "display": "standalone",
+  "background_color": "#050714",
+  "theme_color": "#050714",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/botda82/menu.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}
