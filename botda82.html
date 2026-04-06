@@ -679,10 +679,6 @@ html,body{height:100%;overflow:hidden;background:#050714;font-family:'Outfit',sa
         </select>
       </div>
       <div class="field-wrap">
-        <div class="field-label">🔑 Código da turma</div>
-        <input class="field-inp" id="cadCodigo" type="text" placeholder="Código de acesso"/>
-      </div>
-      <div class="field-wrap">
         <div class="field-label">🔒 Crie sua senha</div>
         <input class="field-inp" id="cadSenha" type="password" placeholder="Mínimo 4 caracteres"/>
       </div>
@@ -1121,11 +1117,10 @@ function fazerLogin(){
 
 function fazerCadastro(){
   const nome=document.getElementById('cadNome').value;
-  const codigo=document.getElementById('cadCodigo').value;
   const senha=document.getElementById('cadSenha').value;
   const err=document.getElementById('cadErr');
   if(!nome){ err.textContent='Selecione seu nome!'; return; }
-  if(codigo!==CODIGO_TURMA){ err.textContent='Código da turma incorreto!'; return; }
+
   if(senha.length<4){ err.textContent='Senha deve ter pelo menos 4 caracteres!'; return; }
   const senhasSalvas=JSON.parse(localStorage.getItem('bot82_senhas')||'{}');
   senhasSalvas[nome]=senha;
