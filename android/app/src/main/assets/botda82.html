@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<meta name="theme-color" content="#050714"/>
+<title>Bot Da 82</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
+html,body{height:100%;overflow:hidden;background:#050714;font-family:'Outfit',sans-serif;color:#e8eaf6;touch-action:manipulation}
+:root{
+  --bg:#050714;--bg2:#080d1e;--bg3:#0d1228;--card:#0a0f20;
+  --border:#1a2040;--border2:#242b50;
+  --cyan:#00f5c4;--purple:#7c6ef5;--pink:#ff4d8d;--gold:#f5a623;
+  --text:#e8eaf6;--muted:#4a5280;--muted2:#6b75a0;
+}
+
+/* ═══ SCROLLBAR ═══ */
+::-webkit-scrollbar{width:2px}
+::-webkit-scrollbar-thumb{background:#1a2040;border-radius:2px}
+
+/* ═══════════════════════════════════════
+   SPLASH / CUTSCENE
+═══════════════════════════════════════ */
+#splash{
+  position:fixed;inset:0;z-index:1000;background:#050714;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  overflow:hidden;
+}
+
+/* partículas de fundo */
+.particles{position:absolute;inset:0;overflow:hidden}
+.particle{
+  position:absolute;border-radius:50%;
+  animation:float linear infinite;
+  opacity:0;
+}
+@keyframes float{
+  0%{transform:translateY(100vh) scale(0);opacity:0}
+  10%{opacity:1}
+  90%{opacity:1}
+  100%{transform:translateY(-10vh) scale(1.5);opacity:0}
+}
+
+/* grid lines */
+.grid-lines{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(0,245,196,0.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,245,196,0.04) 1px,transparent 1px);
+  background-size:40px 40px;
+  animation:gridIn 1s ease forwards;
+  opacity:0;
+}
+@keyframes gridIn{to{opacity:1}}
+
+/* logo wrapper */
+.splash-logo-wrap{
+  position:relative;z-index:2;
+  display:flex;flex-direction:column;align-items:center;
+  animation:splashIn 0.6s cubic-bezier(0.34,1.56,0.64,1) 0.5s both;
+}
+@keyframes splashIn{
+  from{transform:scale(0.3) rotate(-10deg);opacity:0}
+  to{transform:scale(1) rotate(0deg);opacity:1}
+}
+
+.splash-logo-ring{
+  width:120px;height:120px;border-radius:30px;
+  background:linear-gradient(135deg,#00f5c4,#7c6ef5,#ff4d8d);
+  padding:3px;
+  box-shadow:0 0 60px #00f5c455,0 0 120px #7c6ef530;
+  animation:ring-pulse 2s ease-in-out 1.5s infinite;
+}
+@keyframes ring-pulse{
+  0%,100%{box-shadow:0 0 60px #00f5c455,0 0 120px #7c6ef530}
+  50%{box-shadow:0 0 80px #00f5c488,0 0 160px #7c6ef550}
+}
+.splash-logo-inner{
+  width:100%;height:100%;border-radius:27px;overflow:hidden;background:#050714;
+  display:flex;align-items:center;justify-content:center;font-size:64px;
+}
+.splash-logo-inner img{width:100%;height:100%;object-fit:cover}
+
+.splash-title{
+  font-family:'Bebas Neue',sans-serif;font-size:3.5rem;letter-spacing:4px;
+  background:linear-gradient(90deg,#00f5c4,#7c6ef5,#ff4d8d);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  margin-top:18px;
+  animation:titleGlow 2s ease-in-out 2s infinite alternate;
+}
+@keyframes titleGlow{
+  from{filter:drop-shadow(0 0 10px #00f5c455)}
+  to{filter:drop-shadow(0 0 25px #7c6ef577)}
+}
+
+.splash-sub{
+  color:var(--muted2);font-size:.85rem;font-weight:500;letter-spacing:2px;
+  text-transform:uppercase;margin-top:6px;
+  animation:fadeIn 0.5s ease 1.2s both;
+}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+.splash-bar-wrap{
+  width:180px;height:3px;background:#1a2040;border-radius:2px;
+  margin-top:40px;overflow:hidden;
+  animation:fadeIn 0.5s ease 1.5s both;
+}
+.splash-bar{
+  height:100%;width:0;border-radius:2px;
+  background:linear-gradient(90deg,#00f5c4,#7c6ef5);
+  animation:loadBar 2s cubic-bezier(0.4,0,0.2,1) 1.5s forwards;
+}
+@keyframes loadBar{to{width:100%}}
+
+.splash-status{
+  color:var(--muted);font-size:.72rem;letter-spacing:1px;margin-top:10px;
+  animation:fadeIn 0.5s ease 1.5s both;
+}
+
+/* ═══════════════════════════════════════
+   TUTORIAL ONBOARDING
+═══════════════════════════════════════ */
+#tutorial{
+  position:fixed;inset:0;z-index:900;background:#050714;
+  display:none;flex-direction:column;
+}
+
+.tut-slides{flex:1;overflow:hidden;position:relative}
+.tut-slide{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;padding:40px 28px;
+  opacity:0;transform:translateX(60px);transition:all .4s cubic-bezier(0.4,0,0.2,1);
+  pointer-events:none;
+}
+.tut-slide.active{opacity:1;transform:none;pointer-events:auto}
+.tut-slide.exit{opacity:0;transform:translateX(-60px)}
+
+.tut-emoji{font-size:72px;margin-bottom:20px;
+  animation:bounce 1s ease infinite alternate}
+@keyframes bounce{from{transform:translateY(0)}to{transform:translateY(-8px)}}
+
+.tut-title{
+  font-family:'Bebas Neue',sans-serif;font-size:2.2rem;letter-spacing:2px;
+  text-align:center;margin-bottom:12px;
+  background:linear-gradient(90deg,#00f5c4,#7c6ef5);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.tut-desc{
+  color:var(--muted2);font-size:.92rem;text-align:center;
+  line-height:1.7;max-width:300px;
+}
+.tut-highlight{
+  background:#00f5c415;border:1px solid #00f5c430;
+  border-radius:10px;padding:12px 16px;margin-top:16px;
+  color:var(--cyan);font-size:.85rem;text-align:center;width:100%;max-width:300px;
+}
+
+.tut-dots{
+  display:flex;gap:6px;justify-content:center;padding:20px;
+}
+.tut-dot{
+  width:6px;height:6px;border-radius:3px;background:#1a2040;
+  transition:all .3s ease;
+}
+.tut-dot.active{background:var(--cyan);width:20px}
+
+.tut-btns{display:flex;gap:10px;padding:0 20px 36px}
+.btn-tut-skip{
+  flex:1;padding:14px;border:1.5px solid var(--border2);border-radius:14px;
+  background:transparent;color:var(--muted2);font-size:.9rem;font-weight:600;
+  font-family:'Outfit',sans-serif;cursor:pointer;
+}
+.btn-tut-next{
+  flex:2;padding:14px;border:none;border-radius:14px;
+  background:linear-gradient(135deg,#00f5c4,#7c6ef5);
+  color:#050714;font-size:.95rem;font-weight:800;
+  font-family:'Outfit',sans-serif;cursor:pointer;
+  box-shadow:0 4px 20px #00f5c430;
+}
+
+/* ═══════════════════════════════════════
+   AUTH SCREEN
+═══════════════════════════════════════ */
+#authScreen{
+  position:fixed;inset:0;z-index:800;background:var(--bg);
+  display:none;flex-direction:column;align-items:center;
+  overflow-y:auto;padding:32px 20px 48px;
+}
+
+.auth-glow{
+  position:absolute;top:-100px;left:50%;transform:translateX(-50%);
+  width:300px;height:300px;border-radius:50%;
+  background:radial-gradient(#7c6ef520,transparent 70%);
+  pointer-events:none;
+}
+
+.auth-logo{
+  width:72px;height:72px;border-radius:18px;overflow:hidden;
+  background:linear-gradient(135deg,#00f5c4,#7c6ef5);padding:2px;
+  box-shadow:0 8px 32px #00f5c430;margin-bottom:14px;flex-shrink:0;
+}
+.auth-logo-in{width:100%;height:100%;border-radius:16px;overflow:hidden;background:#050714;display:flex;align-items:center;justify-content:center}
+.auth-logo-in img{width:100%;height:100%;object-fit:cover}
+
+.auth-title{
+  font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:3px;
+  background:linear-gradient(90deg,#00f5c4,#7c6ef5);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.auth-sub{color:var(--muted);font-size:.78rem;margin-top:4px;letter-spacing:.5px}
+
+.auth-card{
+  width:100%;max-width:360px;margin-top:24px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:22px;overflow:hidden;
+  box-shadow:0 20px 60px #00000066;
+}
+
+.auth-tabs{display:flex;border-bottom:1px solid var(--border)}
+.auth-tab{
+  flex:1;padding:15px 10px;text-align:center;font-size:.82rem;font-weight:700;
+  color:var(--muted);cursor:pointer;transition:.2s;border-bottom:2px solid transparent;
+  letter-spacing:.3px;
+}
+.auth-tab.active{color:var(--cyan);border-bottom-color:var(--cyan)}
+
+.auth-form{padding:22px}
+.auth-form.hidden{display:none}
+
+.field-wrap{margin-bottom:14px}
+.field-label{
+  font-size:.68rem;font-weight:700;color:var(--muted);
+  letter-spacing:.8px;text-transform:uppercase;margin-bottom:7px;
+  display:flex;align-items:center;gap:5px;
+}
+.field-inp,.field-sel{
+  width:100%;background:var(--bg3);border:1.5px solid var(--border);
+  border-radius:13px;color:var(--text);padding:13px 15px;
+  font-size:.92rem;font-family:'Outfit',sans-serif;outline:none;
+  transition:.2s;-webkit-appearance:none;
+}
+.field-inp:focus,.field-sel:focus{border-color:var(--cyan);background:#0d1228}
+.field-sel option{background:#0d1228;color:#e8eaf6}
+.field-inp.err{border-color:var(--pink)}
+
+.auth-err{min-height:16px;font-size:.73rem;color:var(--pink);padding-left:4px;margin-bottom:8px}
+
+.btn-auth{
+  width:100%;padding:15px;border:none;border-radius:13px;
+  font-size:.95rem;font-weight:800;font-family:'Outfit',sans-serif;cursor:pointer;
+  background:linear-gradient(135deg,#00f5c4,#7c6ef5);color:#050714;
+  transition:.15s;box-shadow:0 4px 20px #00f5c425;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn-auth:active{transform:scale(.97)}
+.btn-auth.purple{background:linear-gradient(135deg,#7c6ef5,#ff4d8d);color:#fff;box-shadow:0 4px 20px #7c6ef525}
+
+.auth-hint{
+  text-align:center;font-size:.75rem;color:var(--muted);margin-top:14px;
+  cursor:pointer;text-decoration:underline;
+}
+
+/* ═══════════════════════════════════════
+   APP
+═══════════════════════════════════════ */
+#app{position:fixed;inset:0;display:none;flex-direction:column}
+
+/* HEADER */
+.hdr{
+  background:var(--bg2);border-bottom:1px solid var(--border);
+  padding:10px 14px;display:flex;align-items:center;gap:10px;
+  box-shadow:0 2px 20px #00000044;flex-shrink:0;
+}
+.hdr-logo{width:36px;height:36px;border-radius:10px;overflow:hidden;flex-shrink:0}
+.hdr-logo img{width:100%;height:100%;object-fit:cover}
+.hdr-title{
+  font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:2px;
+  background:linear-gradient(90deg,#00f5c4,#7c6ef5);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.hdr-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.hdr-user{display:flex;flex-direction:column;align-items:flex-end}
+.hdr-name{font-size:.75rem;font-weight:700;color:var(--text)}
+.role-badge{
+  font-size:.55rem;font-weight:800;padding:2px 8px;border-radius:10px;
+  letter-spacing:.5px;text-transform:uppercase;display:inline-block;margin-top:2px;
+}
+.role-rep{background:#f5a62320;color:var(--gold);border:1px solid #f5a62340}
+.role-admin{background:#7c6ef520;color:var(--purple);border:1px solid #7c6ef540}
+.role-membro{background:#1a2040;color:var(--muted2);border:1px solid var(--border)}
+
+.btn-logout{
+  background:#ff4d8d15;border:1px solid #ff4d8d30;border-radius:8px;
+  color:var(--pink);font-size:.68rem;font-weight:700;padding:5px 9px;cursor:pointer;
+}
+
+/* STATUS BAR */
+.status-bar{
+  background:linear-gradient(90deg,#00f5c408,#7c6ef508);
+  border-bottom:1px solid var(--border);
+  padding:6px 14px;display:flex;align-items:center;gap:8px;flex-shrink:0;
+}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--cyan);
+  animation:pulse-dot 2s ease-in-out infinite}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+.status-txt{font-size:.68rem;color:var(--cyan);font-weight:600;letter-spacing:.5px}
+.status-right{margin-left:auto;font-size:.65rem;color:var(--muted)}
+
+/* TABS */
+.tabs{
+  display:flex;background:var(--bg2);border-bottom:1px solid var(--border);
+  overflow-x:auto;flex-shrink:0;
+}
+.tabs::-webkit-scrollbar{display:none}
+.tab{
+  flex:1;min-width:55px;padding:10px 4px 8px;text-align:center;
+  font-size:.58rem;font-weight:700;color:var(--muted);cursor:pointer;
+  transition:.2s;border-bottom:2.5px solid transparent;white-space:nowrap;
+  letter-spacing:.3px;text-transform:uppercase;
+}
+.tab.active{color:var(--cyan);border-bottom-color:var(--cyan)}
+.tab-icon{display:block;font-size:1rem;margin-bottom:2px}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding:14px 14px 24px;-webkit-overflow-scrolling:touch}
+.content::-webkit-scrollbar{display:none}
+.page{display:none}.page.active{display:block}
+
+/* SECTION TITLE */
+.sec-title{
+  font-size:.65rem;font-weight:800;color:var(--muted);
+  letter-spacing:1.5px;text-transform:uppercase;
+  margin-bottom:10px;display:flex;align-items:center;gap:8px;
+}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* CARDS */
+.card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:16px;padding:16px;margin-bottom:12px;
+  position:relative;overflow:hidden;
+}
+.card.glow-cyan::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,#00f5c4,#7c6ef5);
+}
+.card.glow-purple::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,#7c6ef5,#ff4d8d);
+}
+.card-title{
+  font-size:.9rem;font-weight:700;color:var(--text);
+  display:flex;align-items:center;gap:8px;margin-bottom:12px;
+}
+
+/* STATS GRID */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.stat-card{
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:12px;padding:12px;text-align:center;
+}
+.stat-val{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:1px;
+  background:linear-gradient(90deg,#00f5c4,#7c6ef5);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.stat-lbl{font-size:.65rem;color:var(--muted);margin-top:2px;font-weight:600;letter-spacing:.5px}
+
+/* COMANDOS */
+.cmd-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.cmd-item{
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:12px;padding:11px;cursor:pointer;transition:.2s;
+  position:relative;overflow:hidden;
+}
+.cmd-item::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,#00f5c408,transparent);
+  opacity:0;transition:.2s;
+}
+.cmd-item:active{transform:scale(.97);border-color:var(--cyan)}
+.cmd-item:active::before{opacity:1}
+.cmd-emoji{font-size:1.3rem;margin-bottom:5px}
+.cmd-name{
+  font-size:.82rem;font-weight:700;color:var(--cyan);
+  font-family:'Outfit',sans-serif;margin-bottom:2px;
+}
+.cmd-desc{font-size:.65rem;color:var(--muted);line-height:1.3}
+.cmd-copy{
+  position:absolute;top:7px;right:7px;
+  background:#00f5c415;border:1px solid #00f5c425;
+  border-radius:6px;padding:2px 6px;font-size:.6rem;
+  color:var(--cyan);font-weight:700;
+}
+
+/* ENVIAR */
+.send-info{
+  background:linear-gradient(135deg,#00f5c40a,#7c6ef508);
+  border:1px solid #00f5c420;border-radius:12px;
+  padding:12px 14px;margin-bottom:14px;
+  font-size:.8rem;color:var(--muted2);line-height:1.7;
+}
+.send-info strong{color:var(--cyan)}
+.msg-inp{
+  width:100%;background:var(--bg3);border:1.5px solid var(--border);
+  border-radius:13px;color:var(--text);padding:13px;
+  font-size:.9rem;font-family:'Outfit',sans-serif;
+  outline:none;resize:none;min-height:100px;transition:.2s;margin-bottom:4px;
+}
+.msg-inp:focus{border-color:var(--cyan)}
+.char-c{text-align:right;font-size:.68rem;color:var(--muted);margin-bottom:12px}
+.char-c.warn{color:var(--pink)}
+.btn-send{
+  width:100%;padding:15px;border:none;border-radius:13px;
+  font-size:.95rem;font-weight:800;font-family:'Outfit',sans-serif;cursor:pointer;
+  background:linear-gradient(135deg,#00f5c4,#7c6ef5);color:#050714;
+  transition:.15s;display:flex;align-items:center;justify-content:center;gap:8px;
+  box-shadow:0 4px 20px #00f5c425;
+}
+.btn-send:active{transform:scale(.98)}
+.btn-send:disabled{opacity:.4;cursor:not-allowed}
+
+/* AÇÕES RÁPIDAS */
+.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.quick-btn{
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:12px;padding:14px 10px;cursor:pointer;
+  text-align:center;transition:.2s;
+}
+.quick-btn:active{transform:scale(.96);border-color:var(--purple)}
+.quick-btn-icon{font-size:1.4rem;margin-bottom:4px}
+.quick-btn-label{font-size:.72rem;font-weight:700;color:var(--muted2)}
+
+/* SUGESTÕES */
+.sug-item{
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:12px;padding:13px;margin-bottom:8px;
+  cursor:pointer;transition:.2s;display:flex;align-items:center;gap:12px;
+}
+.sug-item:active{border-color:var(--purple);transform:scale(.98)}
+.sug-icon{
+  width:38px;height:38px;border-radius:10px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:1.2rem;
+}
+.sug-icon.c1{background:#00f5c415}.sug-icon.c2{background:#7c6ef515}
+.sug-icon.c3{background:#ff4d8d15}.sug-icon.c4{background:#f5a62315}
+.sug-text .sug-title{font-size:.85rem;font-weight:700;color:var(--text);margin-bottom:2px}
+.sug-text .sug-desc{font-size:.72rem;color:var(--muted);line-height:1.4}
+.sug-arrow{margin-left:auto;color:var(--muted);font-size:1.1rem}
+
+.sug-input{
+  width:100%;background:var(--bg3);border:1.5px solid var(--border);
+  border-radius:12px;color:var(--text);padding:13px;
+  font-size:.88rem;font-family:'Outfit',sans-serif;
+  outline:none;transition:.2s;margin-bottom:8px;
+}
+.sug-input:focus{border-color:var(--purple)}
+.btn-sug{
+  width:100%;padding:13px;border:none;border-radius:12px;
+  font-size:.9rem;font-weight:800;font-family:'Outfit',sans-serif;cursor:pointer;
+  background:linear-gradient(135deg,#7c6ef5,#ff4d8d);color:#fff;
+  box-shadow:0 4px 20px #7c6ef425;
+}
+
+/* TURMA */
+.turma-section{margin-bottom:16px}
+.turma-section-title{
+  font-size:.62rem;font-weight:800;color:var(--muted);
+  letter-spacing:1.5px;text-transform:uppercase;
+  margin-bottom:8px;display:flex;align-items:center;gap:7px;
+}
+.turma-section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.turma-member{
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:11px;padding:11px 13px;margin-bottom:6px;
+  display:flex;align-items:center;gap:10px;transition:.15s;
+}
+.turma-member.me{border-color:#00f5c440;background:#00f5c408}
+.t-avatar{
+  width:34px;height:34px;border-radius:9px;
+  background:linear-gradient(135deg,#00f5c4,#7c6ef5);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.9rem;flex-shrink:0;font-weight:800;
+  color:#050714;
+}
+.t-info{flex:1;min-width:0}
+.t-name{font-size:.85rem;font-weight:700;color:var(--text);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.t-role{font-size:.68rem;color:var(--muted);margin-top:1px}
+.t-num{font-size:.68rem;color:var(--muted2);margin-top:1px;white-space:nowrap}
+.me-tag{
+  background:#00f5c415;border:1px solid #00f5c430;
+  border-radius:6px;padding:2px 7px;font-size:.6rem;
+  color:var(--cyan);font-weight:800;flex-shrink:0;
+}
+
+/* PROFILE */
+.profile-hero{
+  background:linear-gradient(135deg,#00f5c410,#7c6ef510);
+  border:1px solid #00f5c420;border-radius:16px;padding:20px;
+  margin-bottom:14px;display:flex;align-items:center;gap:14px;
+}
+.profile-avatar-big{
+  width:60px;height:60px;border-radius:16px;flex-shrink:0;
+  background:linear-gradient(135deg,#00f5c4,#7c6ef5);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.6rem;font-weight:800;color:#050714;
+}
+.profile-name-big{font-size:1.1rem;font-weight:800;color:var(--text)}
+.profile-role-big{font-size:.75rem;color:var(--muted2);margin-top:3px}
+.profile-num{font-size:.72rem;color:var(--cyan);margin-top:4px;font-weight:600}
+
+/* INFO CARDS */
+.info-row{display:flex;flex-direction:column;gap:8px}
+.info-item{
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:11px;padding:11px 13px;
+  display:flex;align-items:center;gap:10px;
+}
+.info-icon{font-size:1.1rem;width:28px;text-align:center;flex-shrink:0}
+.info-label{font-size:.68rem;color:var(--muted);margin-bottom:2px;font-weight:600}
+.info-val{font-size:.82rem;color:var(--text);font-weight:600}
+
+/* PREVIEW */
+.preview-box{
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:12px;padding:12px;margin-top:12px;
+}
+.prev-label{font-size:.62rem;color:var(--muted);font-weight:700;
+  letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px}
+.prev-bubble{
+  background:#00f5c415;border:1px solid #00f5c425;
+  border-radius:10px;padding:10px 12px;
+  font-size:.82rem;color:var(--text);line-height:1.6;
+  white-space:pre-wrap;
+}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:20px;left:50%;
+  transform:translateX(-50%) translateY(80px);
+  background:#0d1228;border:1px solid var(--border);border-radius:30px;
+  padding:11px 22px;font-size:.82rem;color:var(--text);
+  display:flex;align-items:center;gap:8px;z-index:9999;
+  transition:transform .35s cubic-bezier(.34,1.56,.64,1);
+  white-space:nowrap;box-shadow:0 8px 40px #00000088;pointer-events:none;
+}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.ok .toast-icon::after{color:var(--cyan)}
+.toast.err .toast-icon::after{color:var(--pink)}
+
+/* ANIM ENTRADA */
+@keyframes slideUp{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1;transform:none}
+}
+.anim{animation:slideUp .4s ease both}
+.anim-d1{animation-delay:.05s}
+.anim-d2{animation-delay:.1s}
+.anim-d3{animation-delay:.15s}
+.anim-d4{animation-delay:.2s}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════
+     SPLASH SCREEN
+══════════════════════════════════ -->
+<div id="splash">
+  <div class="particles" id="particles"></div>
+  <div class="grid-lines"></div>
+  <div class="splash-logo-wrap">
+    <div class="splash-logo-ring">
+      <div class="splash-logo-inner">
+        <img src="menu.jpg" alt="Bot Da 82" onerror="this.style.display='none';this.parentNode.innerHTML='🤖'"/>
+      </div>
+    </div>
+    <div class="splash-title">BOT DA 82</div>
+    <div class="splash-sub">Turma 82 · 8° Ano · 2026</div>
+    <div class="splash-bar-wrap">
+      <div class="splash-bar"></div>
+    </div>
+    <div class="splash-status" id="splashStatus">Iniciando...</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     TUTORIAL
+══════════════════════════════════ -->
+<div id="tutorial">
+  <div class="tut-slides">
+    <div class="tut-slide active" id="tut0">
+      <div class="tut-emoji">👋</div>
+      <div class="tut-title">Bem-vindo!</div>
+      <div class="tut-desc">O app oficial da Turma 82. Aqui você controla o bot, manda mensagens no grupo e fica por dentro de tudo.</div>
+      <div class="tut-highlight">📱 Feito especialmente para a galera da 82</div>
+    </div>
+    <div class="tut-slide" id="tut1">
+      <div class="tut-emoji">🔑</div>
+      <div class="tut-title">Como entrar</div>
+      <div class="tut-desc">Selecione seu nome na lista e use a senha da turma. Cada membro tem acesso ao seu perfil.</div>
+      <div class="tut-highlight">🔒 Senha padrão: <strong>turma82</strong></div>
+    </div>
+    <div class="tut-slide" id="tut2">
+      <div class="tut-emoji">🤖</div>
+      <div class="tut-title">Comandos do Bot</div>
+      <div class="tut-desc">Toque em qualquer comando para copiar. Cole no WhatsApp e o bot responde na hora!</div>
+      <div class="tut-highlight">💡 Use o prefixo <strong>.</strong> antes de cada comando</div>
+    </div>
+    <div class="tut-slide" id="tut3">
+      <div class="tut-emoji">📤</div>
+      <div class="tut-title">Enviar mensagens</div>
+      <div class="tut-desc">Mande mensagens direto pro grupo via app. O bot encaminha com seu nome automaticamente.</div>
+      <div class="tut-highlight">⚡ Limite: 5 mensagens a cada 5 minutos</div>
+    </div>
+    <div class="tut-slide" id="tut4">
+      <div class="tut-emoji">🚀</div>
+      <div class="tut-title">Tudo pronto!</div>
+      <div class="tut-desc">Agora é só usar. Explore as abas, conheça a turma e aproveite o Bot Da 82!</div>
+      <div class="tut-highlight">✅ Bom uso e bons estudos!</div>
+    </div>
+  </div>
+  <div class="tut-dots">
+    <div class="tut-dot active" id="dot0"></div>
+    <div class="tut-dot" id="dot1"></div>
+    <div class="tut-dot" id="dot2"></div>
+    <div class="tut-dot" id="dot3"></div>
+    <div class="tut-dot" id="dot4"></div>
+  </div>
+  <div class="tut-btns">
+    <button class="btn-tut-skip" onclick="skipTutorial()">Pular</button>
+    <button class="btn-tut-next" id="tutNextBtn" onclick="tutNext()">Próximo →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     AUTH SCREEN
+══════════════════════════════════ -->
+<div id="authScreen">
+  <div class="auth-glow"></div>
+  <div class="auth-logo">
+    <div class="auth-logo-in">
+      <img src="menu.jpg" alt="Bot Da 82" onerror="this.style.display='none';this.parentNode.innerHTML='🤖'"/>
+    </div>
+  </div>
+  <div class="auth-title">BOT DA 82</div>
+  <div class="auth-sub">Turma 82 · 8° Ano · 2026</div>
+
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="tabEntrar" onclick="switchAuthTab('entrar')">🔑 Entrar</div>
+      <div class="auth-tab" id="tabCadastrar" onclick="switchAuthTab('cadastrar')">📝 Cadastrar</div>
+    </div>
+
+    <!-- LOGIN -->
+    <div class="auth-form" id="formEntrar">
+      <div class="field-wrap">
+        <div class="field-label">👤 Seu nome</div>
+        <select class="field-sel" id="loginNome">
+          <option value="">Selecione seu nome...</option>
+        </select>
+      </div>
+      <div class="field-wrap">
+        <div class="field-label">🔒 Senha</div>
+        <input class="field-inp" id="loginSenha" type="password" placeholder="Digite sua senha"/>
+      </div>
+      <div class="auth-err" id="loginErr"></div>
+      <button class="btn-auth" onclick="fazerLogin()">✅ Entrar</button>
+      <div class="auth-hint" onclick="switchAuthTab('cadastrar')">Novo? Clique para se cadastrar</div>
+    </div>
+
+    <!-- CADASTRO -->
+    <div class="auth-form hidden" id="formCadastrar">
+      <div class="field-wrap">
+        <div class="field-label">👤 Seu nome</div>
+        <select class="field-sel" id="cadNome">
+          <option value="">Selecione seu nome...</option>
+        </select>
+      </div>
+      <div class="field-wrap">
+        <div class="field-label">🔒 Crie sua senha</div>
+        <input class="field-inp" id="cadSenha" type="password" placeholder="Mínimo 4 caracteres"/>
+      </div>
+      <div class="auth-err" id="cadErr"></div>
+      <button class="btn-auth purple" onclick="fazerCadastro()">📝 Cadastrar</button>
+      <div class="auth-hint" onclick="switchAuthTab('entrar')">Já tem conta? Entrar</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     APP
+══════════════════════════════════ -->
+<div id="app">
+  <div class="hdr">
+    <div class="hdr-logo">
+      <img src="menu.jpg" alt="Bot" onerror="this.textContent='🤖'"/>
+    </div>
+    <div class="hdr-title">BOT DA 82</div>
+    <div class="hdr-right">
+      <div class="hdr-user">
+        <div class="hdr-name" id="hdrName">—</div>
+        <div class="role-badge role-membro" id="hdrBadge">membro</div>
+      </div>
+      <button class="btn-logout" onclick="logout()">Sair</button>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <div class="status-dot"></div>
+    <div class="status-txt">BOT ONLINE</div>
+    <div class="status-right" id="statusTime">—</div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="trocarTab('inicio',this)">
+      <span class="tab-icon">🏠</span>Início
+    </div>
+    <div class="tab" onclick="trocarTab('cmds',this)">
+      <span class="tab-icon">🤖</span>Comandos
+    </div>
+    <div class="tab" onclick="trocarTab('enviar',this)">
+      <span class="tab-icon">📤</span>Enviar
+    </div>
+    <div class="tab" onclick="trocarTab('turma',this)">
+      <span class="tab-icon">👥</span>Turma
+    </div>
+    <div class="tab" onclick="trocarTab('perfil',this)">
+      <span class="tab-icon">👤</span>Perfil
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- INÍCIO -->
+    <div class="page active" id="page-inicio">
+      <div class="stats-grid anim">
+        <div class="stat-card">
+          <div class="stat-val">23</div>
+          <div class="stat-lbl">Membros</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val">15+</div>
+          <div class="stat-lbl">Comandos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val">82</div>
+          <div class="stat-lbl">Turma</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val">24h</div>
+          <div class="stat-lbl">Online</div>
+        </div>
+      </div>
+
+      <div class="sec-title anim anim-d1">⚡ ações rápidas</div>
+      <div class="quick-grid anim anim-d2">
+        <div class="quick-btn" onclick="acaoRapida('piada')">
+          <div class="quick-btn-icon">😂</div>
+          <div class="quick-btn-label">Piada</div>
+        </div>
+        <div class="quick-btn" onclick="acaoRapida('moti')">
+          <div class="quick-btn-icon">🌟</div>
+          <div class="quick-btn-label">Motivação</div>
+        </div>
+        <div class="quick-btn" onclick="acaoRapida('dado')">
+          <div class="quick-btn-icon">🎲</div>
+          <div class="quick-btn-label">Dado</div>
+        </div>
+        <div class="quick-btn" onclick="acaoRapida('moeda')">
+          <div class="quick-btn-icon">🪙</div>
+          <div class="quick-btn-label">Moeda</div>
+        </div>
+      </div>
+
+      <div class="sec-title anim anim-d3">📋 comandos em destaque</div>
+      <div class="cmd-grid anim anim-d4">
+        <div class="cmd-item" onclick="copiarCmd('.fig')">
+          <div class="cmd-emoji">🖼️</div>
+          <div class="cmd-name">.fig</div>
+          <div class="cmd-desc">Cria figurinha de foto/vídeo</div>
+          <div class="cmd-copy">copiar</div>
+        </div>
+        <div class="cmd-item" onclick="copiarCmd('.aulas')">
+          <div class="cmd-emoji">📚</div>
+          <div class="cmd-name">.aulas</div>
+          <div class="cmd-desc">Horário da semana no pv</div>
+          <div class="cmd-copy">copiar</div>
+        </div>
+        <div class="cmd-item" onclick="copiarCmd('.ship')">
+          <div class="cmd-emoji">💕</div>
+          <div class="cmd-name">.ship</div>
+          <div class="cmd-desc">Mede compatibilidade</div>
+          <div class="cmd-copy">copiar</div>
+        </div>
+        <div class="cmd-item" onclick="copiarCmd('.menu')">
+          <div class="cmd-emoji">📋</div>
+          <div class="cmd-name">.menu</div>
+          <div class="cmd-desc">Ver todos os comandos</div>
+          <div class="cmd-copy">copiar</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMANDOS -->
+    <div class="page" id="page-cmds">
+      <div class="sec-title">🖼️ mídia</div>
+      <div class="cmd-grid" style="margin-bottom:14px">
+        <div class="cmd-item" onclick="copiarCmd('.fig')"><div class="cmd-emoji">🖼️</div><div class="cmd-name">.fig</div><div class="cmd-desc">Figurinha de foto ou vídeo citado</div><div class="cmd-copy">copiar</div></div>
+        <div class="cmd-item" onclick="copiarCmd('.musica ')"><div class="cmd-emoji">🎵</div><div class="cmd-name">.musica</div><div class="cmd-desc">Baixa MP3 do YouTube</div><div class="cmd-copy">copiar</div></div>
+        <div class="cmd-item" onclick="copiarCmd('.video ')"><div class="cmd-emoji">🎬</div><div class="cmd-name">.video</div><div class="cmd-desc">Baixa MP4 do YouTube</div><div class="cmd-copy">copiar</div></div>
+      </div>
+
+      <div class="sec-title">💕 diversão</div>
+      <div class="cmd-grid" style="margin-bottom:14px">
+        <div class="cmd-item" onclick="copiarCmd('.ship ')"><div class="cmd-emoji">💕</div><div class="cmd-name">.ship</div><div class="cmd-desc">Mede compatibilidade do casal</div><div class="cmd-copy">copiar</div></div>
+        <div class="cmd-item" onclick="copiarCmd('.ship2 ')"><div class="cmd-emoji">💞</div><div class="cmd-name">.ship2</div><div class="cmd-desc">Ship épico com título</div><div class="cmd-copy">copiar</div></div>
+        <div class="cmd-item" onclick="copiarCmd('.dado')"><div class="cmd-emoji">🎲</div><div class="cmd-name">.dado</div><div class="cmd-desc">Rola um dado</div><div class="cmd-copy">copiar</div></div>
+        <div class="cmd-item" onclick="copiarCmd('.moeda')"><div class="cmd-emoji">🪙</div><div class="cmd-name">.moeda</div><div class="cmd-desc">Cara ou coroa</div><div class="cmd-copy">copiar</div></div>
+        <div class="cmd-item" onclick="copiarCmd('.piada')"><div class="cmd-emoji">😂</div><div class="cmd-name">.piada</div><div class="cmd-desc">Piada aleatória</div><div class="cmd-copy">copiar</div></div>
+        <div class="cmd-item" onclick="copiarCmd('.rps ')"><div class="cmd-emoji">✂️</div><div class="cmd-name">.rps</div><div class="cmd-desc">Pedra papel tesoura</div><div class="cmd-copy">copiar</div></div>
+        <div class="cmd-item" onclick="copiarCmd('.escolhe ')"><div class="cmd-emoji">🎯</div><div class="cmd-name">.escolhe</div><div class="cmd-desc">Sorteia entre opções</div><div class="cmd-copy">copiar</div></div>
+      </div>
+
+      <div class="sec-title">✨ texto & fontes</div>
+      <div class="cmd-grid" style="margin-bottom:14px">
+        <div class="cmd-item" onclick="copiarCmd('.fonte bold ')"><div class="cmd-emoji">𝐁</div><div class="cmd-name">.fonte bold</div><div class="cmd-desc">Texto em negrito especial</div><div class="cmd-copy">copiar</div></div>
+        <div class="cmd-item" onclick="copiarCmd('.fonte italic ')"><div class="cmd-emoji">𝑰</div><div class="cmd-name">.fonte italic</div><div class="cmd-desc">Texto em itálico</div><div class="cmd-copy">copiar</div></div>
+        <div class="cmd-item" onclick="copiarCmd('.fonte bubble ')"><div class="cmd-emoji">Ⓑ</div><div class="cmd-name">.fonte bubble</div><div class="cmd-desc">Texto em bolhas</div><div class="cmd-copy">copiar</div></div>
+        <div class="cmd-item" onclick="copiarCmd('.fonte flip ')"><div class="cmd-emoji">↕️</div><div class="cmd-name">.fonte flip</div><div class="cmd-desc">Texto de cabeça pra baixo</div><div class="cmd-copy">copiar</div></div>
+        <div class="cmd-item" onclick="copiarCmd('.tt ')"><div class="cmd-emoji">🔠</div><div class="cmd-name">.tt</div><div class="cmd-desc">Texto em CAPS</div><div class="cmd-copy">copiar</div></div>
+      </div>
+
+      <div class="sec-title">🔮 extras</div>
+      <div class="cmd-grid" style="margin-bottom:14px">
+        <div class="cmd-item" onclick="copiarCmd('.aulas')"><div class="cmd-emoji">📚</div><div class="cmd-name">.aulas</div><div class="cmd-desc">Horário de aulas no pv</div><div class="cmd-copy">copiar</div></div>
+        <div class="cmd-item" onclick="copiarCmd('.pessoas82')"><div class="cmd-emoji">👥</div><div class="cmd-name">.pessoas82</div><div class="cmd-desc">Lista da turma</div><div class="cmd-copy">copiar</div></div>
+        <div class="cmd-item" onclick="copiarCmd('.moti')"><div class="cmd-emoji">🌟</div><div class="cmd-name">.moti</div><div class="cmd-desc">Frase motivacional</div><div class="cmd-copy">copiar</div></div>
+        <div class="cmd-item" onclick="copiarCmd('.horoscopo ')"><div class="cmd-emoji">🔮</div><div class="cmd-name">.horoscopo</div><div class="cmd-desc">Horóscopo do signo</div><div class="cmd-copy">copiar</div></div>
+        <div class="cmd-item" onclick="copiarCmd('.calc ')"><div class="cmd-emoji">🧮</div><div class="cmd-name">.calc</div><div class="cmd-desc">Calculadora</div><div class="cmd-copy">copiar</div></div>
+        <div class="cmd-item" onclick="copiarCmd('.ping')"><div class="cmd-emoji">🏓</div><div class="cmd-name">.ping</div><div class="cmd-desc">Latência do bot</div><div class="cmd-copy">copiar</div></div>
+        <div class="cmd-item" onclick="copiarCmd('.regras')"><div class="cmd-emoji">📜</div><div class="cmd-name">.regras</div><div class="cmd-desc">Regras do grupo</div><div class="cmd-copy">copiar</div></div>
+      </div>
+    </div>
+
+    <!-- ENVIAR -->
+    <div class="page" id="page-enviar">
+      <div class="send-info">
+        📤 Sua mensagem será enviada no grupo como <strong id="prevNome">você</strong>. Limite: <strong>5 mensagens / 5min</strong>.
+      </div>
+
+      <div class="sec-title">💬 mensagem</div>
+      <textarea class="msg-inp" id="msgTexto" placeholder="Digite sua mensagem aqui..." maxlength="400" oninput="onMsgInput()"></textarea>
+      <div class="char-c" id="charC">0 / 400</div>
+      <button class="btn-send" id="btnEnviarMsg" onclick="enviarMensagem()">
+        <span>📤</span> Enviar no grupo
+      </button>
+
+      <div class="preview-box">
+        <div class="prev-label">👁️ prévia</div>
+        <div class="prev-bubble">
+          <span style="color:var(--cyan);font-weight:700" id="prevNomeMsg">Você</span>: <span id="prevTextoMsg" style="color:var(--muted);font-style:italic">sua mensagem aqui...</span>
+        </div>
+      </div>
+
+      <div style="height:16px"></div>
+      <div class="sec-title">⚡ ações rápidas</div>
+      <div class="sug-item" onclick="acaoRapida('piada')">
+        <div class="sug-icon c1">😂</div>
+        <div class="sug-text"><div class="sug-title">Piada aleatória</div><div class="sug-desc">Bot manda uma piada no grupo agora</div></div>
+        <div class="sug-arrow">›</div>
+      </div>
+      <div class="sug-item" onclick="acaoRapida('moti')">
+        <div class="sug-icon c2">🌟</div>
+        <div class="sug-text"><div class="sug-title">Frase motivacional</div><div class="sug-desc">Inspira a galera da 82</div></div>
+        <div class="sug-arrow">›</div>
+      </div>
+      <div class="sug-item" onclick="acaoRapida('dado')">
+        <div class="sug-icon c4">🎲</div>
+        <div class="sug-text"><div class="sug-title">Rolar dado</div><div class="sug-desc">Sorteia um número de 1 a 6</div></div>
+        <div class="sug-arrow">›</div>
+      </div>
+      <div class="sug-item" onclick="acaoRapida('moeda')">
+        <div class="sug-icon c3">🪙</div>
+        <div class="sug-text"><div class="sug-title">Cara ou coroa</div><div class="sug-desc">Decide na sorte</div></div>
+        <div class="sug-arrow">›</div>
+      </div>
+
+      <div style="height:16px"></div>
+      <div class="sec-title">💡 sugestões</div>
+      <input class="sug-input" id="sugInput" placeholder="Sugerir algo pro bot ou grupo..."/>
+      <button class="btn-sug" onclick="enviarSugestao()">💡 Enviar sugestão</button>
+    </div>
+
+    <!-- TURMA -->
+    <div class="page" id="page-turma">
+      <div class="card glow-cyan">
+        <div class="card-title">👥 Turma 82 · 2026</div>
+        <div id="turmaLista"></div>
+      </div>
+    </div>
+
+    <!-- PERFIL -->
+    <div class="page" id="page-perfil">
+      <div class="profile-hero">
+        <div class="profile-avatar-big" id="profileEmoji">?</div>
+        <div>
+          <div class="profile-name-big" id="profileName">—</div>
+          <div class="profile-role-big" id="profileRole">—</div>
+          <div class="profile-num" id="profileNum">—</div>
+        </div>
+      </div>
+
+      <div class="sec-title">📊 informações</div>
+      <div class="info-row">
+        <div class="info-item">
+          <div class="info-icon">🎓</div>
+          <div><div class="info-label">Turma</div><div class="info-val">82 · 8° Ano · 2026</div></div>
+        </div>
+        <div class="info-item">
+          <div class="info-icon">🏫</div>
+          <div><div class="info-label">Status</div><div class="info-val" id="perfilStatus">Membro ativo</div></div>
+        </div>
+        <div class="info-item">
+          <div class="info-icon">🤖</div>
+          <div><div class="info-label">Bot</div><div class="info-val">+55 48 9184-6401</div></div>
+        </div>
+      </div>
+
+      <div style="height:16px"></div>
+      <button class="btn-auth purple" onclick="logout()" style="max-width:100%">🚪 Sair da conta</button>
+    </div>
+
+  </div><!-- end content -->
+</div><!-- end app -->
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span id="toastIcon"></span>
+  <span id="toastMsg"></span>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════════════════
+const BOT_URL = '';   // URL do servidor do bot (deixe vazio se não tiver)
+const CODIGO_TURMA = 'turma82';
+
+// ── DADOS DA TURMA ──
+const TURMA = [
+  {key:'franco',   display:'Franco',          role:'rep',    emoji:'👑', num:'+55 48 9204-1180'},
+  {key:'belmont',  display:'Yasmin Belmont',  role:'rep',    emoji:'👑', num:'+55 48 9137-3799'},
+  {key:'adrielly', display:'Adrielly',         role:'admin',  emoji:'⭐', num:'+55 48 8847-5258'},
+  {key:'kauan',    display:'Kauan',            role:'admin',  emoji:'⭐', num:'+55 48 9391-3608'},
+  {key:'luiz',     display:'Luiz',             role:'admin',  emoji:'⭐', num:'+55 48 9616-3056'},
+  {key:'mailo',    display:'Mailo',            role:'admin',  emoji:'⭐', num:'+55 48 9942-8228'},
+  {key:'alcides',  display:'Alcides',          role:'membro', emoji:'🦅', num:'+55 48 8846-9121'},
+  {key:'aline',    display:'Aline',            role:'membro', emoji:'🦅', num:'+55 48 7400-5187'},
+  {key:'anavit',   display:'Ana Vitória',      role:'membro', emoji:'🦅', num:'+55 48 8418-7452'},
+  {key:'antonia',  display:'Antonia',          role:'membro', emoji:'🦅', num:'+55 48 8819-0177'},
+  {key:'caio',     display:'Caio Gabriel',     role:'membro', emoji:'🦅', num:'+55 49 8846-7566'},
+  {key:'christian',display:'Christian',        role:'membro', emoji:'🦅', num:'+55 48 8811-0653'},
+  {key:'esther',   display:'Esther',           role:'membro', emoji:'🦅', num:'—'},
+  {key:'felipe',   display:'Felipe',           role:'membro', emoji:'🦅', num:'+55 48 8800-3239'},
+  {key:'isaque',   display:'Isaque',           role:'membro', emoji:'🦅', num:'+55 48 9112-7517'},
+  {key:'mariana',  display:'Mariana',          role:'membro', emoji:'🦅', num:'+55 48 8460-8197'},
+  {key:'maria',    display:'Maria',            role:'membro', emoji:'🦅', num:'+55 48 8417-1068'},
+  {key:'matheus',  display:'Matheus',          role:'membro', emoji:'🦅', num:'+55 48 8873-0551'},
+  {key:'paulo',    display:'Paulo',            role:'membro', emoji:'🦅', num:'+55 48 9971-3173'},
+  {key:'ruan',     display:'Ruan',             role:'membro', emoji:'🦅', num:'+55 48 9647-3271'},
+  {key:'vitoria',  display:'Vitória',          role:'membro', emoji:'🦅', num:'+55 41 9165-5215'},
+  {key:'yasmin',   display:'Yasmin',           role:'membro', emoji:'🦅', num:'+55 48 8878-3277'},
+];
+
+function norm(s){ return (s||'').toLowerCase().trim(); }
+function getTurmaItem(k){ return TURMA.find(t=>norm(t.key)===norm(k)); }
+function roleLabel(r){ return r==='rep'?'Representante':r==='admin'?'Admin':'Membro'; }
+function roleClass(r){ return r==='rep'?'role-rep':r==='admin'?'role-admin':'role-membro'; }
+
+// ══════════════════════════════════════════════════
+//  SPLASH
+// ══════════════════════════════════════════════════
+function criarParticulas(){
+  const wrap = document.getElementById('particles');
+  const cols = ['#00f5c4','#7c6ef5','#ff4d8d','#f5a623'];
+  for(let i=0;i<20;i++){
+    const p = document.createElement('div');
+    p.className='particle';
+    const sz = Math.random()*4+2;
+    p.style.cssText=`
+      width:${sz}px;height:${sz}px;
+      left:${Math.random()*100}%;
+      background:${cols[Math.floor(Math.random()*cols.length)]};
+      animation-duration:${Math.random()*8+5}s;
+      animation-delay:${Math.random()*5}s;
+    `;
+    wrap.appendChild(p);
+  }
+}
+
+const STATUS_MSGS = [
+  'Iniciando...','Carregando turma...','Conectando ao bot...',
+  'Verificando sessão...','Pronto! ✅'
+];
+let sIdx=0;
+function animStatus(){
+  const el=document.getElementById('splashStatus');
+  if(!el||sIdx>=STATUS_MSGS.length) return;
+  el.textContent=STATUS_MSGS[sIdx++];
+  if(sIdx<STATUS_MSGS.length) setTimeout(animStatus,500);
+}
+
+window.onload=()=>{
+  criarParticulas();
+  animStatus();
+  // Verifica sessão
+  const session=localStorage.getItem('bot82_session');
+  const jaViuTutorial=localStorage.getItem('bot82_tutorial');
+  setTimeout(()=>{
+    document.getElementById('splash').style.opacity='0';
+    document.getElementById('splash').style.transition='opacity .5s ease';
+    setTimeout(()=>{
+      document.getElementById('splash').style.display='none';
+      if(session && getTurmaItem(session)){
+        entrar(session);
+      } else if(!jaViuTutorial){
+        document.getElementById('tutorial').style.display='flex';
+      } else {
+        mostrarAuth();
+      }
+    },500);
+  },3500);
+};
+
+// ══════════════════════════════════════════════════
+//  TUTORIAL
+// ══════════════════════════════════════════════════
+let tutSlide=0;
+const TUT_TOTAL=5;
+
+function tutNext(){
+  if(tutSlide>=TUT_TOTAL-1){ skipTutorial(); return; }
+  document.getElementById('tut'+tutSlide).classList.remove('active');
+  document.getElementById('tut'+tutSlide).classList.add('exit');
+  document.getElementById('dot'+tutSlide).classList.remove('active');
+  tutSlide++;
+  setTimeout(()=>{
+    document.querySelectorAll('.tut-slide').forEach(s=>s.classList.remove('exit'));
+    document.getElementById('tut'+tutSlide).classList.add('active');
+    document.getElementById('dot'+tutSlide).classList.add('active');
+  },350);
+  if(tutSlide===TUT_TOTAL-1){
+    document.getElementById('tutNextBtn').textContent='Começar 🚀';
+  }
+}
+
+function skipTutorial(){
+  localStorage.setItem('bot82_tutorial','done');
+  document.getElementById('tutorial').style.display='none';
+  mostrarAuth();
+}
+
+// ══════════════════════════════════════════════════
+//  AUTH
+// ══════════════════════════════════════════════════
+function mostrarAuth(){
+  preencherSelects();
+  const el=document.getElementById('authScreen');
+  el.style.display='flex';
+  el.style.opacity='0';
+  el.style.transition='opacity .4s ease';
+  setTimeout(()=>el.style.opacity='1',10);
+}
+
+function preencherSelects(){
+  ['loginNome','cadNome'].forEach(id=>{
+    const sel=document.getElementById(id);
+    if(!sel) return;
+    sel.innerHTML='<option value="">Selecione seu nome...</option>';
+    TURMA.forEach(t=>{
+      const op=document.createElement('option');
+      op.value=t.key; op.textContent=t.display;
+      sel.appendChild(op);
+    });
+  });
+}
+
+function switchAuthTab(tab){
+  document.getElementById('tabEntrar').className='auth-tab'+(tab==='entrar'?' active':'');
+  document.getElementById('tabCadastrar').className='auth-tab'+(tab==='cadastrar'?' active':'');
+  document.getElementById('formEntrar').className='auth-form'+(tab==='entrar'?'':' hidden');
+  document.getElementById('formCadastrar').className='auth-form'+(tab==='cadastrar'?'':' hidden');
+}
+
+function fazerLogin(){
+  const nome=document.getElementById('loginNome').value;
+  const senha=document.getElementById('loginSenha').value;
+  const err=document.getElementById('loginErr');
+  if(!nome){ err.textContent='Selecione seu nome!'; return; }
+  if(!senha){ err.textContent='Digite sua senha!'; return; }
+  // Verificar senha salva
+  const senhasSalvas=JSON.parse(localStorage.getItem('bot82_senhas')||'{}');
+  const senhaPadrao=senha===CODIGO_TURMA;
+  const senhaCorreta=senhasSalvas[nome]&&senhasSalvas[nome]===senha;
+  if(!senhaPadrao && !senhaCorreta){
+    err.textContent='Senha incorreta!';
+    document.getElementById('loginSenha').classList.add('err');
+    return;
+  }
+  err.textContent='';
+  localStorage.setItem('bot82_session',nome);
+  document.getElementById('authScreen').style.display='none';
+  entrar(nome);
+}
+
+function fazerCadastro(){
+  const nome=document.getElementById('cadNome').value;
+  const senha=document.getElementById('cadSenha').value;
+  const err=document.getElementById('cadErr');
+  if(!nome){ err.textContent='Selecione seu nome!'; return; }
+
+  if(senha.length<4){ err.textContent='Senha deve ter pelo menos 4 caracteres!'; return; }
+  const senhasSalvas=JSON.parse(localStorage.getItem('bot82_senhas')||'{}');
+  senhasSalvas[nome]=senha;
+  localStorage.setItem('bot82_senhas',JSON.stringify(senhasSalvas));
+  localStorage.setItem('bot82_session',nome);
+  err.textContent='';
+  document.getElementById('authScreen').style.display='none';
+  entrar(nome);
+  toast('ok','✅','Cadastro realizado com sucesso!');
+}
+
+// ══════════════════════════════════════════════════
+//  ENTRAR NO APP
+// ══════════════════════════════════════════════════
+function entrar(key){
+  const t=getTurmaItem(key);
+  if(!t) return;
+  document.getElementById('hdrName').textContent=t.display;
+  const badge=document.getElementById('hdrBadge');
+  badge.textContent=roleLabel(t.role);
+  badge.className='role-badge '+roleClass(t.role);
+  document.getElementById('prevNome').textContent=t.display;
+  document.getElementById('prevNomeMsg').textContent=t.display;
+  document.getElementById('profileEmoji').textContent=t.emoji||t.display[0];
+  document.getElementById('profileName').textContent=t.display;
+  document.getElementById('profileRole').textContent=roleLabel(t.role)+' · Turma 82 · 2026';
+  document.getElementById('profileNum').textContent=t.num||'—';
+  document.getElementById('perfilStatus').textContent=
+    t.role==='rep'?'Representante ativa':t.role==='admin'?'Admin do grupo':'Membro ativo';
+  renderTurma(key);
+  const app=document.getElementById('app');
+  app.style.display='flex';
+  app.style.opacity='0';
+  app.style.transition='opacity .4s ease';
+  setTimeout(()=>app.style.opacity='1',10);
+  atualizarHora();
+  setInterval(atualizarHora,60000);
+}
+
+function atualizarHora(){
+  const el=document.getElementById('statusTime');
+  if(el) el.textContent=new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+}
+
+function renderTurma(myKey){
+  const el=document.getElementById('turmaLista');
+  const sections=[
+    {title:'👑 Representação',filter:t=>t.role==='rep'},
+    {title:'⭐ Admins',filter:t=>t.role==='admin'},
+    {title:'👥 Membros',filter:t=>t.role==='membro'},
+  ];
+  el.innerHTML='';
+  sections.forEach(s=>{
+    const members=TURMA.filter(s.filter);
+    if(!members.length) return;
+    const sec=document.createElement('div');
+    sec.className='turma-section';
+    sec.innerHTML='<div class="turma-section-title">'+s.title+'</div>';
+    members.forEach(t=>{
+      const isMe=norm(t.key)===norm(myKey);
+      const d=document.createElement('div');
+      d.className='turma-member'+(isMe?' me':'');
+      d.innerHTML=
+        '<div class="t-avatar">'+t.emoji+'</div>'+
+        '<div class="t-info">'+
+          '<div class="t-name">'+(isMe?'★ ':'')+t.display+'</div>'+
+          '<div class="t-role">'+roleLabel(t.role)+'</div>'+
+          '<div class="t-num">'+(t.num||'—')+'</div>'+
+        '</div>'+
+        (isMe?'<div class="me-tag">EU</div>':'');
+      sec.appendChild(d);
+    });
+    el.appendChild(sec);
+  });
+}
+
+function logout(){
+  localStorage.removeItem('bot82_session');
+  document.getElementById('app').style.display='none';
+  mostrarAuth();
+}
+
+// ══════════════════════════════════════════════════
+//  TABS
+// ══════════════════════════════════════════════════
+function trocarTab(id,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelector('.content').scrollTop=0;
+}
+
+// ══════════════════════════════════════════════════
+//  COMANDOS / COPIAR
+// ══════════════════════════════════════════════════
+function copiarCmd(cmd){
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(cmd).then(()=>toast('ok','✅','"'+cmd+'" copiado!'));
+  } else {
+    const ta=document.createElement('textarea');
+    ta.value=cmd; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+    toast('ok','✅','"'+cmd+'" copiado!');
+  }
+}
+
+// ══════════════════════════════════════════════════
+//  MENSAGEM
+// ══════════════════════════════════════════════════
+function onMsgInput(){
+  const v=document.getElementById('msgTexto').value;
+  const el=document.getElementById('charC');
+  el.textContent=v.length+' / 400';
+  el.className='char-c'+(v.length>350?' warn':'');
+  const pt=document.getElementById('prevTextoMsg');
+  pt.textContent=v||'sua mensagem aqui...';
+  pt.style.fontStyle=v?'normal':'italic';
+  pt.style.color=v?'var(--text)':'var(--muted)';
+}
+
+const RL=5,RW=5*60*1000;
+function checarRL(){
+  const now=Date.now();
+  let ts=[];
+  try{ts=JSON.parse(localStorage.getItem('bot82_msgs')||'[]').filter(t=>now-t<RW);}catch{}
+  if(ts.length>=RL){
+    const rest=Math.ceil((RW-(now-ts[0]))/1000);
+    toast('err','⏳','Aguarde '+Math.floor(rest/60)+'m'+rest%60+'s');
+    return false;
+  }
+  ts.push(now);localStorage.setItem('bot82_msgs',JSON.stringify(ts));
+  return true;
+}
+
+async function enviarMensagem(){
+  const msg=document.getElementById('msgTexto').value.trim();
+  if(!msg){toast('err','⚠️','Digite uma mensagem!');return;}
+  if(!checarRL()) return;
+  if(!BOT_URL){toast('err','🔌','Bot URL não configurada');return;}
+  const key=localStorage.getItem('bot82_session');
+  const t=getTurmaItem(key);
+  const nick=t?t.display:'Anônimo';
+  const btn=document.getElementById('btnEnviarMsg');
+  btn.disabled=true;btn.innerHTML='<span>⏳</span> Enviando...';
+  try{
+    const r=await fetch(BOT_URL+'/enviar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nick,msg})});
+    const d=await r.json();
+    if(d.ok){toast('ok','✅','Enviado no grupo!');document.getElementById('msgTexto').value='';onMsgInput();}
+    else toast('err','❌',d.erro||'Erro');
+  }catch{toast('err','❌','Bot offline ou URL não configurada');}
+  btn.disabled=false;btn.innerHTML='<span>📤</span> Enviar no grupo';
+}
+
+async function acaoRapida(tipo){
+  if(!BOT_URL){toast('info','💡','Configure a URL do bot!');return;}
+  const labels={piada:'Piada',moti:'Motivação',dado:'Dado',moeda:'Moeda'};
+  try{
+    const r=await fetch(BOT_URL+'/acao',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tipo})});
+    const d=await r.json();
+    d.ok?toast('ok','✅',labels[tipo]+' enviada!'):toast('err','❌',d.erro||'Erro');
+  }catch{toast('err','❌','Bot offline');}
+}
+
+async function enviarSugestao(){
+  const sug=document.getElementById('sugInput').value.trim();
+  if(!sug){toast('err','⚠️','Digite sua sugestão!');return;}
+  if(!BOT_URL){toast('ok','💡','Sugestão salva localmente!');document.getElementById('sugInput').value='';return;}
+  const key=localStorage.getItem('bot82_session');
+  const t=getTurmaItem(key);
+  const nick=t?t.display:'Anônimo';
+  try{
+    await fetch(BOT_URL+'/enviar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nick,msg:'💡 [SUGESTÃO de '+nick+']\n\n'+sug})});
+    toast('ok','💡','Sugestão enviada!');document.getElementById('sugInput').value='';
+  }catch{toast('err','❌','Bot offline');}
+}
+
+// ══════════════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════════════
+let tTimer;
+function toast(tipo,icon,msg){
+  const el=document.getElementById('toast');
+  document.getElementById('toastIcon').textContent=icon;
+  document.getElementById('toastMsg').textContent=msg;
+  el.className='toast show';
+  clearTimeout(tTimer);
+  tTimer=setTimeout(()=>el.classList.remove('show'),2800);
+}
+</script>
+</body>
+</html>
