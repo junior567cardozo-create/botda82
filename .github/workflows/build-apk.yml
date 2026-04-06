@@ -21,32 +21,15 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Instalar Bubblewrap
-        run: npm install -g @bubblewrap/cli
+      - name: Instalar PWABuilder CLI
+        run: npm install -g @pwabuilder/cli
 
-      - name: Configurar Bubblewrap
+      - name: Gerar APK
         run: |
-          mkdir -p ~/.bubblewrap
-          printf '{"jdkPath":"%s","androidSdkPath":"%s"}' "$JAVA_HOME" "$ANDROID_HOME" > ~/.bubblewrap/config.json
-
-      - name: Init TWA
-        run: |
-          mkdir apk-build && cd apk-build
-          bubblewrap init \
-            --manifest "https://junior567cardozo-create.github.io/botda82/manifest.json" \
-            --directory . \
-            --packageId "com.botda82.app" \
-            --name "Bot Da 82" \
-            --launcherName "Bot Da 82" \
-            --themeColor "#050714" \
-            --backgroundColor "#050714" \
-            --startUrl "/botda82/botda82.html" \
-            --iconUrl "https://junior567cardozo-create.github.io/botda82/menu.jpg" \
-            --maskableIconUrl "https://junior567cardozo-create.github.io/botda82/menu.jpg" \
-            --skipPwaValidation
-
-      - name: Build APK
-        run: cd apk-build && bubblewrap build --skipSigning
+          pwa package \
+            --url "https://junior567cardozo-create.github.io/botda82/botda82.html" \
+            --platform android \
+            --output ./apk-output
 
       - name: Release
         uses: softprops/action-gh-release@v2
@@ -57,7 +40,7 @@ jobs:
             ## 📱 Bot Da 82
             1. Baixe o .apk abaixo
             2. Permita fontes desconhecidas
-            3. Instale e aproveite! 🔥
-          files: apk-build/*.apk
+            3. Instale! 🔥
+          files: apk-output/**/*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
