@@ -12,40 +12,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
-          node-version: '20'
+          distribution: 'temurin'
+          java-version: '17'
 
-      - name: Instalar dependências
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Instalar Bubblewrap
+        run: npm install -g @bubblewrap/cli
+
+      - name: Configurar Bubblewrap
         run: |
-          npm install -g @bubblewrap/cli
-          sudo apt-get install -y openjdk-17-jdk
+          mkdir -p ~/.bubblewrap
+          printf '{"jdkPath":"%s","androidSdkPath":"%s"}' "$JAVA_HOME" "$ANDROID_HOME" > ~/.bubblewrap/config.json
 
-      - name: Criar manifest PWA
-        run: |
-          cat > manifest.json << 'EOF'
-          {
-            "name": "Bot Da 82",
-            "short_name": "Bot Da 82",
-            "description": "App oficial da Turma 82 - 8° Ano 2026",
-            "start_url": "/botda82/botda82.html",
-            "display": "standalone",
-            "background_color": "#050714",
-            "theme_color": "#050714",
-            "orientation": "portrait",
-            "icons": [
-              {
-                "src": "/botda82/menu.jpg",
-                "sizes": "512x512",
-                "type": "image/jpeg",
-                "purpose": "any maskable"
-              }
-            ]
-          }
-          EOF
-
-      - name: Criar APK com Bubblewrap
+      - name: Init TWA
         run: |
           mkdir apk-build && cd apk-build
           bubblewrap init \
@@ -58,23 +42,22 @@ jobs:
             --backgroundColor "#050714" \
             --startUrl "/botda82/botda82.html" \
             --iconUrl "https://junior567cardozo-create.github.io/botda82/menu.jpg" \
-            --maskableIconUrl "https://junior567cardozo-create.github.io/botda82/menu.jpg"
-          bubblewrap build
+            --maskableIconUrl "https://junior567cardozo-create.github.io/botda82/menu.jpg" \
+            --skipPwaValidation
 
-      - name: Upload APK como Release
-        uses: softprops/action-gh-release@v1
+      - name: Build APK
+        run: cd apk-build && bubblewrap build --skipSigning
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ github.run_number }}
-          name: "Bot Da 82 v${{ github.run_number }}"
+          name: "📱 Bot Da 82 v${{ github.run_number }}"
           body: |
-            ## 📱 Bot Da 82 - APK
-            
-            Baixe o APK abaixo e instale no seu Android!
-            
-            **Como instalar:**
-            1. Baixe o arquivo `.apk`
-            2. Permita instalação de fontes desconhecidas
+            ## 📱 Bot Da 82
+            1. Baixe o .apk abaixo
+            2. Permita fontes desconhecidas
             3. Instale e aproveite! 🔥
-          files: apk-build/app-release-unsigned.apk
+          files: apk-build/*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
