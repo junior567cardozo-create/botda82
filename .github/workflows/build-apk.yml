@@ -5,77 +5,43 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build-apk:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+      - uses: android-actions/setup-android@v3
 
-      - name: Instalar Bubblewrap e responder perguntas
+      - name: Clonar template TWA
         run: |
-          npm install -g @bubblewrap/cli
-          mkdir -p ~/.bubblewrap
-          cat > ~/.bubblewrap/config.json << CONF
-          {
-            "jdkPath": "$JAVA_HOME",
-            "androidSdkPath": "$ANDROID_HOME"
-          }
-          CONF
+          git clone https://github.com/GoogleChromeLabs/svgomg-twa.git apk-src
+          cd apk-src
 
-      - name: Criar twa-manifest.json
+      - name: Configurar app
         run: |
-          cat > twa-manifest.json << MANIFEST
-          {
-            "packageId": "com.botda82.app",
-            "host": "junior567cardozo-create.github.io",
-            "name": "Bot Da 82",
-            "launcherName": "Bot Da 82",
-            "display": "standalone",
-            "themeColor": "#050714",
-            "navigationColor": "#050714",
-            "backgroundColor": "#050714",
-            "enableNotifications": false,
-            "startUrl": "/botda82/botda82.html",
-            "iconUrl": "https://junior567cardozo-create.github.io/botda82/menu.jpg",
-            "maskableIconUrl": "https://junior567cardozo-create.github.io/botda82/menu.jpg",
-            "appVersion": "1.0.0",
-            "appVersionCode": 1,
-            "signingKey": {
-              "path": "android.keystore",
-              "alias": "android"
-            },
-            "splashScreenFadeOutDuration": 300,
-            "enableSiteSettingsShortcut": true,
-            "isChromeOSOnly": false,
-            "isMetaQuest": false,
-            "fullScopeUrl": "https://junior567cardozo-create.github.io/botda82/",
-            "minSdkVersion": 21,
-            "orientation": "portrait"
-          }
-          MANIFEST
+          cd apk-src
+          sed -i 's/svgomg.firebaseapp.com/junior567cardozo-create.github.io/g' app/build.gradle
+          sed -i 's|/|/botda82/botda82.html|g' app/src/main/res/values/strings.xml || true
+          sed -i 's/com.googlesamples.twa/com.botda82.app/g' app/build.gradle
+          sed -i 's/SVG OMG/Bot Da 82/g' app/src/main/res/values/strings.xml || true
 
-      - name: Build APK com Bubblewrap direto
+      - name: Build APK
         run: |
-          mkdir apk-build
-          cp twa-manifest.json apk-build/twa-manifest.json
-          cd apk-build
-          bubblewrap build --manifest twa-manifest.json --skipSigning 2>&1 || true
-          ls -la
+          cd apk-src
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon 2>&1 | tail -20
+          find . -name "*.apk"
 
-      - name: Procurar APK gerado
-        run: find . -name "*.apk" 2>/dev/null
-
-      - name: Release
+      - name: Upload Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ github.run_number }}
@@ -85,7 +51,6 @@ jobs:
             1. Baixe o .apk abaixo
             2. Permita fontes desconhecidas
             3. Instale! 🔥
-          files: |
-            **/*.apk
+          files: apk-src/**/*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
